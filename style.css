@@ -1,9 +1,53 @@
-h1 {
-    font-size: 6em;
-    color: red;
-    margin: auto;
+html, body {
+	height: 100%;
 }
 
-body {
-    color: beige;
+code {
+	position: center;
+	font-family: Consolas,"courier new";
+	color: crimson;
+	background-color: #f1f1f1;
+	padding: 2px;
+	width: 100%;
+	min-height: 100%;
+	font-size: 75%;
+	display: block;
+	white-space: pre-wrap 
 }
+
+.tools {
+	position: fixed;
+	left: 0;
+	top: 0;
+	background-color: #000000;
+	padding: 10px;
+	width: 100%;
+	color: #e3e3e3;
+}
+
+.controls {
+	position: fixed;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: #000000;
+	color: #e3e3e3;
+	padding: 10px;
+}
+
+input {
+	width: 75%;
+}
+
+button {
+	width: 23%;
+}
+
+
+
+/*textarea {
+	background-color: #f1f1f1; 
+	font-size: 125%;
+	height: 7;
+	padding: 10px;
+}*/

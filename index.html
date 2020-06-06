@@ -5,8 +5,19 @@
 		<title> make what? </title>
 	</head>
 	<body>
-		
-		<input id="clickme" type="button" value="Choose Device">
+		<!-- -->
+		<div class="tools">
+			<button id="scan" onclick="_scan()">Scan for Devices</button>
+			<button id="auth" onclick="_auth()">Authenticate</button>
+		</div>
+		<br>
+		<br>
+		<code id="console">Waiting for device connection...</code>
+		<br>
+		<div class="controls">
+			<input type="text" name="command" >
+			<button onclick="appendtext()" >SEND</button>
+		</div>
 		<script type="text/javascript" src="script.js"></script>
 	</body>
 </html>
