@@ -7,17 +7,20 @@
 	<body>
 		<!-- -->
 		<div class="tools">
-			<button id="scan" onclick="_scan()">Scan for Devices</button>
-			<button id="auth" onclick="_auth()">Authenticate</button>
+			<button id="connect">Scan for Devices</button>
+			<button id="auth">Authenticate</button>
+			<button id="start">Start</button>
+			<button id="fcan">Flush CAN queue</button>
+			<button id="fusb">Flush USB queue</button>
 		</div>
 		<br>
 		<br>
 		<code id="console">Waiting for device connection...</code>
 		<br>
 		<div class="controls">
-			<input type="text" name="command" >
-			<button onclick="appendtext()" >SEND</button>
+			<input type="text" id="command" >
+			<button id="send" >SEND</button>
 		</div>
-		<script type="text/javascript" src="script.js"></script>
+		<script type="text/javascript" src="script1.js"></script>
 	</body>
 </html>

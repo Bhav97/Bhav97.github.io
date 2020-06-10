@@ -1,47 +1,48 @@
 html, body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	height: 100%;
-}
-
-code {
-	position: center;
-	font-family: Consolas,"courier new";
-	color: crimson;
-	background-color: #f1f1f1;
-	padding: 2px;
 	width: 100%;
-	min-height: 100%;
-	font-size: 75%;
-	display: block;
-	white-space: pre-wrap 
+	margin: auto;
+    background-color: #e3e3e3;
 }
 
 .tools {
-	position: fixed;
-	left: 0;
-	top: 0;
-	background-color: #000000;
-	padding: 10px;
-	width: 100%;
-	color: #e3e3e3;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: #1f5768;
+	height: 10%;
 }
 
 .controls {
-	position: fixed;
-	left: 0;
-	bottom: 0;
+	display: flex;
+	justify-content: center;
+	background-color: #1f5768;
 	width: 100%;
-	background-color: #000000;
-	color: #e3e3e3;
-	padding: 10px;
+	height: 7%;
+	width: auto;
+	padding: 2px;
 }
 
 input {
-	width: 75%;
+	width: 80%;
+}
+
+code#console {
+	background-color: #f1f1f1;
+    color: crimson;
+    height: inherit;
+	white-space: pre-wrap;
+	font-size: 125%;
+    padding: 5px;
 }
 
 button {
-	width: 23%;
+	margin: 5px;
 }
+
 
 
 

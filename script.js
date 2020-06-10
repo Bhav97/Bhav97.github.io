@@ -7,6 +7,18 @@
 // 		return this
 // 	}
 // }
+const FLCAN_CMD_FLUSH_HOSTQ 	= 0x00; //impl
+const FLCAN_CMD_FLUSH_DEVQ 		= 0x01; //impl
+const FLCAN_CMD_SET_BITRATE 	= 0xAA;
+const FLCAN_CMD_GET_BITRATE		= 0xAB;
+const FLCAN_CMD_SET_MODE 		= 0x11;
+const FLCAN_CMD_GET_MODE 		= 0x12;
+const FLCAN_CMD_SET_CHG			= 0x22; //impl
+const FLCAN_CMD_GET_CHG			= 0x23; //impl
+const FLCAN_CMD_START 			= 0x33; //impl
+const FLCAN_CMD_STOP 			= 0x34; //impl
+const FLCAN_CMD_GET_STATS 		= 0xEE;
+const FLCAN_CMD_GET_FEATURES 	= 0xE4;
 
 var device;
 navigator.usb.addEventListener('connect', (evt) => {
@@ -18,9 +30,39 @@ navigator.usb.addEventListener('disconnect', (evt) => {
 });
 
 
+function flush_queue_usb()
+{
+	device.controlTransferOut({
+		requestType: 'class',
+		recipient: 'interface',
+		request: FLCAN_CMD_FLUSH_HOSTQ,
+		value: 0x00,
+		index: 0x00
+	})
+	.then( ()=>{ _write("[!] Flushed device USB queue\n") } )
+	.catch( ()=>{ _write("[!]" + err + "\n") } );
+}
+
+function flush_queue_can()
+{
+	device.controlTransferOut({
+		requestType: 'class',
+		recipient: 'interface',
+		request: FLCAN_CMD_FLUSH_DEVQ,
+		value: 0x00,
+		index: 0x00
+	})
+	.then( ()=>{ _write("[!] Flushed device CAN queue\n"); } )
+	.catch( (err)=>{_write("[!]" +  err + "\n"); } );
+}
 
 function appendtext() {
-	// document.getElementById("console").appendtext()
+	document.getElementsByName("command")[0].value
+	.replace(/ /g,"")
+	.split(",")
+	.forEach((val)=>{ 
+		console.log(parseInt(val)); 
+	});
 }
 
 function _send() {
@@ -49,7 +91,7 @@ function _attach(device) {
 	device.open()
 	.then(() => { device.selectConfiguration(1); })
 	.then(() => { device.claimInterface(0); })
-	.catch(error => { console.log(error) });
+	.catch(error => { _write("[!] " + error + "\n") });
 }
 
 function _clear() {
@@ -60,14 +102,75 @@ function _write(str) {
 	document.getElementById("console").appendChild(document.createTextNode(str));
 }
 
-function _auth() {
+var buf;
 
+function _auth() {
+	device.controlTransferIn({
+		requestType: 'class',
+		recipient: 'interface',
+		request: 0x23,
+		value: 0x00,
+		index: 0x00
+	}, 4)
+	.then((res)=>{
+		let decoder = new TextDecoder();
+		console.log(res.data.buffer);
+		buf = res.data;
+		device.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: 0x22,
+			value: 0x00,
+			index: 0x00
+		}, res.data.buffer);
+		console.log(decoder.decode(res.data));
+	})
+	.then(()=>{ _write("[!] Authenticated!\n"); })
+	.catch((err)=>{ _write("[!] " + err + "\n"); });
+}
+
+
+function _start() {
+	var button = document.getElementById("toggle");
+	if ( button.innerHTML == "Start" )
+	{
+		device.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: FLCAN_CMD_START,
+			value: 0x00,
+			index: 0x00
+		})
+		.then( ()=>{ 
+			_write("[!] Activating CAN peripheral\n");
+			button.innerHTML = "Stop";
+		})
+		.catch( (err)=>{ _write("[!]" + err); } );
+	}
+	else if ( button.innerHTML == "Stop" )
+	{
+		device.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: FLCAN_CMD_STOP,
+			value: 0x00,
+			index: 0x00
+		})
+		.then( ()=>{ 
+			_write("[!] Deactivating CAN peripheral\n");
+			button.innerHTML = "Start";
+		})
+		.catch( (err)=>{ _write("[!]" + err); } );
+	}
+	else{
+		console.log(button.innerHTML);
+	}// do nothing
 }
 
 //{ vendorId: 0xcafe}
 function _scan() {
 	_clear();
-	navigator.usb.requestDevice({ filters: [{ vendorId: 0xdeeb }] })
+	navigator.usb.requestDevice({ filters: [{ vendorId: 0xb00b }] })
 	.then(d => {
 		device = d;
 		_write("PRODUCT: " + device.productName + "\n");
