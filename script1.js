@@ -1,11 +1,5 @@
 var flcan = {};
 
-function sleeper(ms) {
-  return function(x) {
-    return new Promise(resolve => setTimeout(() => resolve(x), ms));
-  };
-}
-
 (function() {
 	'use strict';
 
@@ -48,15 +42,72 @@ function sleeper(ms) {
 				return this.device_.selectConfiguration(1);
 			}
 		})
-		.then(() => this.device_.claimInterface(0));
+		.then(() => this.device_.claimInterface(0))
+		.then(() => this.device_.claimInterface(1))
+		.then(() => this.authenticate());
 	};
 
-	flcan.Port.prototype.start = function(first_argument) {
-		// body...
+	flcan.Port.prototype.start = function() {
+		this.device_.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: 0x08,
+			value: 0x00,
+			index: 0x00
+		})
+		.then(() => {
+			readLoop();
+		})
 	};
 
 	flcan.Port.prototype.authenticate = function(first_argument) {
-		// body...
+		return this.device_.controlTransferIn({
+			requestType: 'class',
+			recipient: 'interface',
+			request: 0x07,
+			value:0x00,
+			index: 0x00
+		}, 4)
+		.then((res) => {
+			console.log(res.data);
+			this.device_.controlTransferOut({
+					requestType: 'class',
+					recipient: 'interface',
+					request: 0x06,
+					value: 0x00,
+					index: 0x00
+				}, res.data);
+		})
+		.then(() => {
+			console.log("Authenticated !");
+		});
+	};
+
+	flcan.Port.prototype.flush_can = function() {
+		return this._device.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: 0x01,
+			value: 0x00,
+			index: 0x00
+		});
+	};
+
+	flcan.Port.prototype.flush_usb = function() {
+		return this._device.controlTransferOut({
+			requestType: 'class',
+			recipient: 'interface',
+			request: 0x00,
+			value: 0x00,
+			index: 0x00
+		});
+	};
+
+	flcan.Port.prototype.flush = function() {
+		this.flush_usb()
+		.then(() => this.flush_can())
+		.then(() => console.log("Flushed queues!"))
+		.catch((err) => console.log(err));
 	};
 
 	flcan.Port.prototype.disconnect = function() {
