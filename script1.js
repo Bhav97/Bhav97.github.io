@@ -34,13 +34,15 @@ var flcan = {};
 			{ 'vendorId': 0xB00B, 'productID': 0x1EE5 },
 			/* Add more here */
 		];
-		return navigator.usb.requestDevice({ 'filters': filters }).then(
+		return navigator.usb.requestDevice({ 'filters': [] }).then(
 			device => new flcan.Port(device)
 		);
 	}
 
 	flcan.Port = function(device) {
 		this.device_ = device;
+		this.packet_rx = { metadata: null, data: null };
+		this.packet_tx = { metadata: null, data: null };
 	};
 
 	flcan.Port.prototype.connect = function() {
@@ -91,24 +93,99 @@ var flcan = {};
 		}
 	}
 
+	flcan.Port.prototype.clearRxPacket = function() {
+		this.packet_rx.metadata = null;
+		this.packet_rx.data = null;
+	}
+
+	flcan.Port.prototype.clearTxPacket = function() {
+		this.packet_tx.metadata = null;
+		this.packet_tx.data = null;
+	}
+
+	flcan.Port.prototype.stop = function() {
+		return this.sendCommand(flcan.opcodes.FLCAN_CMD_STOP)
+		.then(this._stop = true)
+	}
+
 	flcan.Port.prototype.start = function() {
 		let readLoop = () => {
 			const {
 				endpointNumber
 			} = this.device_.configuration.interfaces[0].alternate.endpoints[0]
-			this.device_.transferIn(endpointNumber, 64).then(result => {
-				this.onReceive(result.data);
+			this.device_.transferIn(endpointNumber, 12)
+			.then( buffer => {
+				// console.log(buffer.data);
+				// if ( this.packet_rx.metadata == null ) {
+				this.packet_rx.metadata = buffer.data;
+				// } else {
+					
+				// }
+				// if (!this._stop) {
+					// readLoop();
+				// }
+			})
+			.catch( error => {
+				this.onReceiveError(error);
+			})
+			.then(() => {
+				return this.device_.transferIn(endpointNumber, this.packet_rx.metadata.getUint8(8))
+			})
+			.then(buffer => {
+				this.packet_rx.data = buffer.data;
+				this.onReceive(this.packet_rx);
 				readLoop();
-			}, error => {
+			})
+			.catch( error => {
 				this.onReceiveError(error);
 			});
 		};
 
-		return this.sendCommand(flcan.opcodes.FLCAN_CMD_START)
+		return this.selectProtocol()
+		// .then(() => {
+		// 	return this.identify(0x23);
+		// })
+		.then(() => {
+			return this.sendCommand(flcan.opcodes.FLCAN_CMD_START);
+		})
+		// .then(() => {
+		// 	return this.wake(0x23)
+		// })
+		// .then(this._stop = false)
 		.then(() => {
 			readLoop();
 		})
 	};
+
+	flcan.Port.prototype.selectProtocol = function() {
+		return this.sendCommand(0x0C, new Uint8Array([1]));
+
+	};
+
+	flcan.Port.prototype.wake = function(addr) {
+		return this.sendCommand(0x10) /* wakeup */
+		// .then(sleeper(1000)) /* wait 1 sec */
+		// .then(this.sendCommand(0x0E, new Uint8Array([addr]))) /* authenticate */
+		// .then(sleeper(10000))  wait 1 sec 
+		// .then(this.sendCommand(0x0F, new Uint8Array([addr]))) /* synchronize */
+		// .then(sleeper/(500)); /* wait 1 sec */
+	};
+
+	flcan.Port.prototype.south = function(ddr) {
+		return this.sendCommand(0x0E, new Uint8Array([ddr]));
+	}
+
+	flcan.Port.prototype.sync = function(addr) {
+		return this.sendCommand(0x0F, new Uint8Array([addr]));
+	}	
+
+	flcan.Port.prototype.sleep = function(addr) {
+		return this.sendCommand(0x12, new Uint8Array([addr]));
+	}
+
+	flcan.Port.prototype.identify = function(addr) {
+		return this.sendCommand(0x11, new Uint8Array([addr]));
+	}
 
 	flcan.Port.prototype.authenticate = function() {
 		return this.sendCommand(flcan.opcodes.FLCAN_CMD_GET_CHG, 4)
@@ -132,35 +209,72 @@ var flcan = {};
 		return this.device_.close();
 	};
 
-	flcan.Port.prototype.send = function(data) {
+	flcan.Port.prototype.send = function(metadata, data) {
 		const {
 			endpointNumber
 		} = this.device_.configuration.interfaces[0].alternate.endpoints[1]
-		return this.device_.transferOut(endpointNumber, data);
+		return this.device_.transferOut(endpointNumber, metadata)
+		.then(()=> this.device_.transferOut(endpointNumber, data))
+		.catch(err => { console.log(err); });
 	};
 })();
 
 let port;
 let t;
+/* https://stackoverflow.com/questions/38956121/how-to-add-delay-to-promise-inside-then */
+function sleeper(ms) {
+  return function(x) {
+    return new Promise(resolve => setTimeout(() => resolve(x), ms));
+  };
+}
 
 function connect() {
 	port.connect().then(() => {
 		port.onReceive = data => {
-			console.log(data.buffer);
+			// console.log("onReceive");
+			// console.log(data);
 
-			let time = data.getUint32(0, true);
-			let canid = data.getUint32(4, true);
-			let dlc = data.getUint8(8, true);
-			_write("IN> ID: " + canid + ", DLC:  " + dlc + "[");
-			for (var i = 0; i < dlc; i++) {
-				_write(data.getUint8(12 + i));
+			// let time = data.getUint32(0, true);
+			// let canid = data.getUint32(4, true);
+			// let dlc = data.getUint8(8, true);
+			// _write("IN> ID: " + canid + ", DLC:  " + dlc + "[");
+			// for (var i = 0; i < dlc; i++) {
+			// 	_write(data.getUint8(12 + i));
+			// }
+			// _write("]\n");
+			// str = new TextDecoder().decode(data["buffer"].slice(12, 12+dlc));
+			// if (str != "") {
+			// 	t = data;
+			// 	_write("IN> ID: " + canid + ", DLC: " + dlc +"[" + str +"]\n");
+			// }
+			try {
+				var canid = data.metadata.getUint32(4, true); //?little endian
+			} catch(err) {
+				return;
 			}
-			_write("]\n");
-			str = new TextDecoder().decode(data["buffer"].slice(12, 12+dlc));
-			if (str != "") {
-				t = data;
-				_write("IN> ID: " + canid + ", DLC: " + dlc +"[" + str +"]\n");
+			console.log(canid.toString(16));
+			return;
+			if ((canid & 0x00ffff) != 0xff33) {
+				if ((canid & 0x00ffff) == 0xfffc) {
+					console.log("Heartbeat!");
+				} else {
+					console.log(canid.toString(16));
+				}
+				return;
 			}
+			var recvdata = data.data;
+			try {
+				var timestamp = data.metadata.getUint32(0, true); //?little endian
+				var dlc = data.metadata.getUint8(8);
+				// console.log(timestamp.toString(16));
+				// console.log(canid.toString(16));
+				// console.log(dlc);
+				_write("IN["+ timestamp +"]> " + canid.toString(16) + ": " + recvdata.getUint8(0) +"\n");
+				parseData(recvdata.getUint8(0), recvdata);
+			}
+			catch(err)
+			{ console.log(err);}
+
 		}
 
 		port.onReceiveError = error => {
@@ -174,12 +288,108 @@ function connect() {
 	});
 }
 
-function send(data) {
+bms_info = {}
+
+function parseData(gf, data) {
+	console.log("Parsing");
+	switch(gf) {
+		case 1: {
+			// voltages
+			if (bms_info.series === undefined) {
+				break;
+			}
+
+			s = { timestamp: 0, cellVoltages: [] };
+			s.timestamp = data.getUint32(1, true);
+			for (var i = 0; i < bms_info.series; i++) {
+				s.cellVoltages.push(data.getUint16(5 + i*2, true));
+			}
+			console.log(JSON.stringify(s));
+			break;
+		}
+
+		case 2: {
+			// temperature
+			var s = { timestamp: 0, temperatures: []};
+			s.timestamp = data.getUint32(1, true);
+			for (var i = 0; i < 7; i++) {
+				s.temperatures.push( data.getInt16(5 + i*2, true).toString());
+			}
+			console.log(JSON.stringify(s));
+			break;
+		}
+
+		case 3: {
+			//misc
+			var s 			= {};
+			s.timestamp 	= data.getUint32(1, true);
+			s.isenseCurrent = data.getInt32(5, true);
+			s.SOC 			= data.getFloat32(9, true);
+			s.SOH 			= data.getFloat32(13, true);
+			s.stackVoltage 	= data.getUint16(17, true);
+			console.log(JSON.stringify(s));
+			// console.log();
+			break;
+		}
+
+		case 4: {
+			//stats
+			break;
+		}
+
+		case 5: {
+			//capacity
+			break;
+		}
+
+		case 6: {
+			//
+
+			break;
+		}
+		case 7: {
+			//fault frame
+			console.log(data.getUint8(5).toString(2));
+			break;
+		}
+
+		case 8: {
+		/*
+		 	uint8_t batt_id[20];
+			uint8_t bms_ver;
+			uint8_t warranty;
+			uint8_t str_series;
+			uint8_t str_parallel;
+			uint16_t design_cap;
+		*/
+			bms_info.id = new TextDecoder().decode(data["buffer"].slice(5, 25));
+			bms_info.version =  data.getUint8(26);
+			bms_info.warranty = data.getUint8(27);
+			bms_info.series = data.getUint8(28);
+			bms_info.parallel = data.getUint8(29);
+			// bms_info.des_cap = data.getUint16(30, true);
+			break;
+		}
+	}
+}
+
+function send(canid, data, dlc) {
 	// _write("OUT> " + string + "\n");
 	// let view = new TextEncoder('utf-8').encode(string);
+	// /* Data Packet Struct */
+// typedef struct {
+// 		uint32_t timestamp;
+// 		canid_t id;
+// 		uint8_t dlc;
+// 		uint8_t _[3]; /* padding */
+// } FLCAN_MetadataPdu_t;]
+	console.log(canid);
 	console.log(data);
+	var metadata = new Uint8Array([ 0,0,0,0, canid & 0xFF, (canid >> 8) & 0xFF, (canid >> 16) & 0xFF, (canid >> 24) & 0xFF, dlc ]);
+	// console.log()
+	// console.log(packet);
 	if (port) {
-		port.send(data);
+		port.send(metadata, new Uint8Array(data));
 	}
 }
 
@@ -230,45 +440,22 @@ window.onload = _ => {
 		} 
 		else if (this.innerHTML == "Stop")
 		{
-			port.start()
+			port.stop()
 			.then(_write("[!] Deactivating CAN peripheral\n"))
 			.then( this.innerHTML = "Start" );
 		}
 	}
 
 	document.querySelector("#flush").onclick = function() {
-		port.flush()
+		port.sleep()
 		.then( _write("[!] Flushing device queues\n") );
 	}
 
 	document.querySelector("#send").onclick = () => {
 		let id = parseInt(document.querySelector("#id").value);
-		let data = document.querySelector("#data").value.split(",").slice(0,8).map(num => parseInt(num)).reverse();
+		let data = document.querySelector("#data").value.split(",").slice(0,8).map(num => parseInt(num));
 		let dlc = data.length;
-
-
-		/* push reserved bytes */
-		data.push(0);
-		data.push(0);
-		data.push(0);
-		/* push dlc */
-		data.push(dlc);
-		/* push MSB first */
-		data.push(id >> 24);
-		data.push(id >> 16);
-		data.push(id >> 8);
-		data.push(id >> 0);
-		/* push fake timestamp */
-		data.push(0);
-		data.push(0);
-		data.push(0);
-		data.push(0);
-		// console.log(data);
-		/* push data */
-		// byte_fields.forEach((field, idx) => {
-		// 	data.push(parseInt(field.value));
-		// });
-		send(new Uint8Array(data).reverse());
+		send(id, data, data.length);
 	}
 
 	document.querySelector("#data").oninput = function inputparser() {
