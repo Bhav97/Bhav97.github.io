@@ -253,7 +253,7 @@ function connect() {
 				return;
 			}
 			console.log(canid.toString(16));
-			return;
+			// return;
 			if ((canid & 0x00ffff) != 0xff33) {
 				if ((canid & 0x00ffff) == 0xfffc) {
 					console.log("Heartbeat!");
