@@ -8,6 +8,10 @@ html, body {
     overflow: hidden;
 }
 
+body.dropping {
+	border-color: purple;
+}
+
 .tools {
 	padding: 5px;
 	flex-grow: 0;

@@ -108,53 +108,30 @@ var flcan = {};
 		.then(this._stop = true)
 	}
 
-	flcan.Port.prototype.start = function() {
-		let readLoop = () => {
-			const {
-				endpointNumber
-			} = this.device_.configuration.interfaces[0].alternate.endpoints[0]
-			this.device_.transferIn(endpointNumber, 12)
-			.then( buffer => {
-				// console.log(buffer.data);
-				// if ( this.packet_rx.metadata == null ) {
+	flcan.Port.prototype.start = async function() {
+		let readLoop = async () => {
+			while (this.read) {
+				const { endpointNumber } = this.device_.configuration.interfaces[0].alternate.endpoints[0]
+				var buffer = await this.device_.transferIn(endpointNumber, 12);
+				if (!buffer) continue;
 				this.packet_rx.metadata = buffer.data;
-				// } else {
-					
-				// }
-				// if (!this._stop) {
-					// readLoop();
-				// }
-			})
-			.catch( error => {
-				this.onReceiveError(error);
-			})
-			.then(() => {
-				return this.device_.transferIn(endpointNumber, this.packet_rx.metadata.getUint8(8))
-			})
-			.then(buffer => {
-				this.packet_rx.data = buffer.data;
+				
+				buffer = await this.device_.transferIn(endpointNumber, 64);
+				if (!buffer) continue;
+				this.packet_rx.data  = buffer.data;
+
 				this.onReceive(this.packet_rx);
-				readLoop();
-			})
-			.catch( error => {
-				this.onReceiveError(error);
-			});
+			}
 		};
 
-		return this.selectProtocol()
-		// .then(() => {
-		// 	return this.identify(0x23);
-		// })
-		.then(() => {
-			return this.sendCommand(flcan.opcodes.FLCAN_CMD_START);
-		})
-		// .then(() => {
-		// 	return this.wake(0x23)
-		// })
-		// .then(this._stop = false)
-		.then(() => {
-			readLoop();
-		})
+		var res = await this.selectProtocol()
+		console.log("selectProtocol:", res);
+		res = await this.sendCommand(flcan.opcodes.FLCAN_CMD_START)
+		console.log("FLCAN_CMD_START:", res);
+		this.read = true;
+		res = await this.identify(0x23);
+		console.log("identify:", res);
+		readLoop();
 	};
 
 	flcan.Port.prototype.selectProtocol = function() {
@@ -205,6 +182,10 @@ var flcan = {};
 		return this.flush_can().then(this.flush_usb());
 	};
 
+	flcan.Port.sendFOTAPhrase = async function() {
+		return 
+	}
+
 	flcan.Port.prototype.disconnect = function() {
 		return this.device_.close();
 	};
@@ -217,10 +198,17 @@ var flcan = {};
 		.then(()=> this.device_.transferOut(endpointNumber, data))
 		.catch(err => { console.log(err); });
 	};
+
+	flcan.Port.prototype.desync = function(addr) {
+		return this.sendCommand(0x13, new Uint8Array([addr]));
+	};
+
 })();
 
 let port;
 let t;
+bms_info = {}
+
 /* https://stackoverflow.com/questions/38956121/how-to-add-delay-to-promise-inside-then */
 function sleeper(ms) {
   return function(x) {
@@ -231,6 +219,9 @@ function sleeper(ms) {
 function connect() {
 	port.connect().then(() => {
 		port.onReceive = data => {
+			if (port.ota_start !== undefined) {
+
+			}
 			// console.log("onReceive");
 			// console.log(data);
 
@@ -288,20 +279,18 @@ function connect() {
 	});
 }
 
-bms_info = {}
-
 function parseData(gf, data) {
 	console.log("Parsing");
 	switch(gf) {
 		case 1: {
 			// voltages
-			if (bms_info.series === undefined) {
-				break;
-			}
+			// if (bms_info.series === undefined) {
+			// 	break;
+			// }
 
 			s = { timestamp: 0, cellVoltages: [] };
 			s.timestamp = data.getUint32(1, true);
-			for (var i = 0; i < bms_info.series; i++) {
+			for (var i = 0; i < 14; i++) {
 				s.cellVoltages.push(data.getUint16(5 + i*2, true));
 			}
 			console.log(JSON.stringify(s));
@@ -310,9 +299,12 @@ function parseData(gf, data) {
 
 		case 2: {
 			// temperature
+			if (bms_info.series === undefined) {
+				break;
+			}
 			var s = { timestamp: 0, temperatures: []};
 			s.timestamp = data.getUint32(1, true);
-			for (var i = 0; i < 7; i++) {
+			for (var i = 0; i < bms_info.therm_count; i++) {
 				s.temperatures.push( data.getInt16(5 + i*2, true).toString());
 			}
 			console.log(JSON.stringify(s));
@@ -334,6 +326,17 @@ function parseData(gf, data) {
 
 		case 4: {
 			//stats
+			var s = {};
+			s.timestamp = data.getUint32(1, true);
+			s.balancing = [];
+			for (var i = 0; i < 14; ++i) {
+				s.balancing.push(data.getUint8(5+i))
+			}
+			s.mosfets = [];
+			for (var i = 0; i < 3; ++i) {
+				s.mosfets.push(data.getUint8(19+i))
+			}
+			console.log(JSON.stringify(s))
 			break;
 		}
 
@@ -363,10 +366,16 @@ function parseData(gf, data) {
 			uint16_t design_cap;
 		*/
 			bms_info.id = new TextDecoder().decode(data["buffer"].slice(5, 25));
-			bms_info.version =  data.getUint8(26);
-			bms_info.warranty = data.getUint8(27);
-			bms_info.series = data.getUint8(28);
-			bms_info.parallel = data.getUint8(29);
+			bms_info.version =  data.getUint8(25);
+			bms_info.warranty = data.getUint8(26);
+			bms_info.series = data.getUint8(27);
+			bms_info.parallel = data.getUint8(28);
+			if ( bms_info.id == "HRYYHW0XDZUT7SXYGM28" ) {
+				bms_info.therm_count = 7;
+			} else {
+				bms_info.therm_count = 0;
+			}
+			console.log(bms_info);
 			// bms_info.des_cap = data.getUint16(30, true);
 			break;
 		}
@@ -407,7 +416,7 @@ window.onload = _ => {
 		{
 			flcan.requestPort().then(selectedPort => { 
 				port = selectedPort; 
-				_clear()
+				_clear();
 				_write("PRODUCT: " + port.device_.productName + "\n")
 				_write("VENDOR: " + port.device_.manufacturerName + "\n")
 				_write("SERIAL: " + port.device_.serialNumber.toString(16) + "\n")
@@ -450,6 +459,38 @@ window.onload = _ => {
 		port.sleep()
 		.then( _write("[!] Flushing device queues\n") );
 	}
+
+	document.querySelector('#fw').addEventListener('input', (e) => {
+		console.log(e.target.value);
+	})
+
+	var dnd = new DnDFileController('body', function(data) {
+
+	var file = data.files[0];
+	var reader = new FileReader();
+	reader.onload = function(progressEvent) {
+		var lines = this.result.split('\n');
+		for(var line = 0; line < lines.length; line++){
+			console.log(lines[line]);
+			port.sendFOTAPhrase(lines[line]);
+		}
+	}
+	reader.readAsText(file);
+
+	// for (var i = 0; i < data.items.length; i++) {
+	// 	var item = data.items[i];
+	// 	console.log(item)
+	// 	if (item.kind == 'file' && item.type.match('\*\.srec') && item.webkitGetAsEntry()) {
+	// 			chosenEntry = item.webkitGetAsEntry();
+	// 			break;
+	// 	}
+	// };
+
+	// if (!chosenEntry) {
+	// 	console.log("Sorry. That's not a text file.");
+	// 	return;
+	// }
+	});
 
 	document.querySelector("#send").onclick = () => {
 		let id = parseInt(document.querySelector("#id").value);
