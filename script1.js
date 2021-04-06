@@ -104,6 +104,7 @@ var flcan = {};
 	}
 
 	flcan.Port.prototype.stop = function() {
+		await this.desync(0x23);
 		return this.sendCommand(flcan.opcodes.FLCAN_CMD_STOP)
 		.then(this._stop = true)
 	}
@@ -131,6 +132,7 @@ var flcan = {};
 		this.read = true;
 		res = await this.identify(0x23);
 		console.log("identify:", res);
+		await this.sync(0x23);
 		readLoop();
 	};
 
@@ -284,13 +286,13 @@ function parseData(gf, data) {
 	switch(gf) {
 		case 1: {
 			// voltages
-			// if (bms_info.series === undefined) {
-			// 	break;
-			// }
+			if (bms_info.series === undefined) {
+			 	break;
+			}
 
 			s = { timestamp: 0, cellVoltages: [] };
 			s.timestamp = data.getUint32(1, true);
-			for (var i = 0; i < 14; i++) {
+			for (var i = 0; i < bms_info.series; i++) {
 				s.cellVoltages.push(data.getUint16(5 + i*2, true));
 			}
 			console.log(JSON.stringify(s));
