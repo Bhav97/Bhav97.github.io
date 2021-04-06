@@ -104,8 +104,7 @@ var flcan = {};
 	}
 
 	flcan.Port.prototype.stop = function() {
-		await this.desync(0x23);
-		return this.sendCommand(flcan.opcodes.FLCAN_CMD_STOP)
+		return this.desync(0x23).then(() => { this.sendCommand(flcan.opcodes.FLCAN_CMD_STOP)})
 		.then(this._stop = true)
 	}
 
