@@ -371,11 +371,11 @@ function parseData(gf, data) {
 			bms_info.warranty = data.getUint8(26);
 			bms_info.series = data.getUint8(27);
 			bms_info.parallel = data.getUint8(28);
-			if ( bms_info.id == "HRYYHW0XDZUT7SXYGM28" ) {
-				bms_info.therm_count = 7;
-			} else {
-				bms_info.therm_count = 0;
-			}
+			//if ( bms_info.id == "HRYYHW0XDZUT7SXYGM28" ) {
+			//	bms_info.therm_count = 7;
+			//} else {
+				bms_info.therm_count = 3;
+			//}
 			console.log(bms_info);
 			// bms_info.des_cap = data.getUint16(30, true);
 			break;
