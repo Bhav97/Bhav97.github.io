@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+	<head>
+        <link rel="stylesheet" type="text/css" href="style.css" />
+		<title> make what? </title>
+	</head>
+	<body>
+		<!-- -->
+		<div class="tools">
+			<button id="connect">Connect</button>
+			<button id="auth">Authenticate</button>
+			<button id="start">Start</button>
+			<button id="flush">Flush data queue</button>
+			<input type="file" id="fw" name="fw" accept=".srec">
+		</div>
+		<code id="console">Waiting for device connection...</code>
+		<div class="controls">
+			<div class="l1">
+				 <div class="form-group">
+					<label for="id">ID</label>
+					<input type="text" id="id" >
+				</div>
+				 <div class="form-group-little">
+					<label for="ascii">ASCII</label>
+					<input type="checkbox" id="ascii" >
+				</div>
+				<div class="form-group">
+					<label for="data">Data</label>
+					<input type="text" id="data">
+				</div>
+				<button id="send" >SEND</button>
+			</div>
+			<div class="l2">
+				<div class="form-group">
+					<label for="byte0">DB0</label>
+					<input type="text" id="byte0" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte1">DB1</label>
+					<input type="text" id="byte1" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte2">DB2</label>
+					<input type="text" id="byte2" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte3">DB3</label>
+					<input type="text" id="byte3" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte4">DB4</label>
+					<input type="text" id="byte4" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte5">DB5</label>
+					<input type="text" id="byte5" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte6">DB6</label>
+					<input type="text" id="byte6" disabled>
+				</div>
+				<div class="form-group">
+					<label for="byte7">DB7</label>
+					<input type="text" id="byte7"  disabled>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="script1.js"></script>
+		<script type="text/javascript" src="dnd.js"></script>
+	</body>
+</html>

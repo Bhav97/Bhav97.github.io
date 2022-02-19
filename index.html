@@ -1,71 +1,80 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-	<head>
-        <link rel="stylesheet" type="text/css" href="style.css" />
-		<title> make what? </title>
-	</head>
-	<body>
-		<!-- -->
-		<div class="tools">
-			<button id="connect">Connect</button>
-			<button id="auth">Authenticate</button>
-			<button id="start">Start</button>
-			<button id="flush">Flush data queue</button>
-			<input type="file" id="fw" name="fw" accept=".srec">
-		</div>
-		<code id="console">Waiting for device connection...</code>
-		<div class="controls">
-			<div class="l1">
-				 <div class="form-group">
-					<label for="id">ID</label>
-					<input type="text" id="id" >
-				</div>
-				 <div class="form-group-little">
-					<label for="ascii">ASCII</label>
-					<input type="checkbox" id="ascii" >
-				</div>
-				<div class="form-group">
-					<label for="data">Data</label>
-					<input type="text" id="data">
-				</div>
-				<button id="send" >SEND</button>
-			</div>
-			<div class="l2">
-				<div class="form-group">
-					<label for="byte0">DB0</label>
-					<input type="text" id="byte0" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte1">DB1</label>
-					<input type="text" id="byte1" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte2">DB2</label>
-					<input type="text" id="byte2" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte3">DB3</label>
-					<input type="text" id="byte3" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte4">DB4</label>
-					<input type="text" id="byte4" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte5">DB5</label>
-					<input type="text" id="byte5" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte6">DB6</label>
-					<input type="text" id="byte6" disabled>
-				</div>
-				<div class="form-group">
-					<label for="byte7">DB7</label>
-					<input type="text" id="byte7"  disabled>
-				</div>
-			</div>
-		</div>
-		<script type="text/javascript" src="script1.js"></script>
-		<script type="text/javascript" src="dnd.js"></script>
-	</body>
+  <head>
+    <title>
+
+    </title>
+    <link rel="stylesheet" type="text/css" href="resume.css" />
+  </head>
+  <body>
+  <header>
+    <h1>Anubhav Raina</h1>
+    <p>
+      <a href="mailto:anubhav7991@gmail.com">Mail</a> | 
+      <a href="https://www.linkedin.com/in/bhav97">LinkedIn</a> | 
+      <a href="https://www.github.com/bhav97">Github</a> |
+      <a href="https://nubs.me">nubs.me</a>
+    </p>
+  </header>
+
+  <section name="Skills">
+    <hr>
+    <deets role="" date="">
+    </deets>
+  </section>
+
+  <section name="Experience">
+    <hr>
+    <deets role="Software Engineer" date="July 2021 - Present"></deets>
+    <extra-deets name="Aptiv Components - TCI" location="Bengaluru, IN"></extra-deets>
+      <desc>
+        Lorem Ipsum shit but it has to be long
+      </desc>
+
+    <deets role="Embedded Software Engineer" date="May 2019 - July 2021"></deets>
+    <extra-deets name="Vecmocon Technology Pvt. Ltd." location="Delhi, IN"></extra-deets>
+    <ul>
+      <li>Developed and maintained firmware for ISO 26262 compliant battery management systems</li>
+      <li>Responsible for the development of a portable A/B swap bootloader capable of receiving OTA updates via CAN allowing in-field reprogramming and updating of ECUs</li>
+      <li>Responsible for the bring up and development of hardware designed for internal testing and data logging</li>
+      <li>Developed cross-platform USB drivers for communicating with ECUs over a CAN-USB interface</li>
+      <li>Developed various communication bridges as per OEM requirements</li>
+    </ul>
+  </section>
+
+  <section name="Education">
+    <hr>
+    <deets role="Vellore Institute of Technology" date="May 2019"></deets>
+    <extra-deets name="Bachelor of Technology in Electrical and Electronics" location="Vellore, TN"></extra-deets>
+  </section>
+
+  <section name="Projects">
+    <hr>
+    <deets role="Raytracing in a weekend" date="Rust"></deets>
+    <extra-deets name="" location="Bengaluru, IN"></extra-deets>
+    <p>
+      A follow along of Peter Shirley's ray tracing in a weekend in Rust.
+    </p>
+  </section>
+  <!-- <education>
+    <hr>
+    <school>
+      <name>Vellore Institute Of Technology</name>
+      <year>May 2019</year>
+      <br>
+      <desc>Bachelor of Technology in Electrical and Electronics</desc>
+    </school>
+  </education>
+
+  <projects>
+    <h2>Projects</h2>
+    <hr>
+    <project>
+      <name>Autonomous </name>
+      <desc></desc>
+    </project>
+
+  </projects> -->
+
+  </body>
 </html>

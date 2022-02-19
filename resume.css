@@ -1,0 +1,125 @@
+body {
+    background-color: blanchedalmond;
+    margin: 0%;
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+header {
+    text-align: center;
+    margin: 3%;
+    width: 100%;
+}
+
+header a {
+    text-emphasis-color: black;
+    text-decoration-color: black;
+    color: black;
+}
+
+header p {
+    margin: 0%;
+}
+
+header h1 {
+    font-size: xx-large;
+    color: black;
+    margin: 0%;
+}
+
+section::before {
+    content: attr(name);
+    text-align: start;
+    font-variant: small-caps;
+    font-size: x-large;
+    font-weight: lighter;
+    font-style: normal;
+    width: 100%;
+}
+
+section hr {
+    width: 100%;
+}
+
+section {
+    width: 60%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-bottom: 2%;
+    /* padding-right: 25%; */
+    /* padding-left: 25%; */
+}
+
+section deets {
+    width: 98%;
+    margin: 4px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+section deets::before {
+    content: attr(role);
+    font-size: large;
+    font-weight: bold;
+    text-align: start;
+}
+
+section deets::after {
+    content: attr(date);
+    font-size: large;
+    font-weight: lighter;
+    font-style: italic;
+    text-align: end;
+}
+
+section extra-deets {
+    width: 98%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+section extra-deets::before {
+    content: attr(name);
+    font-size: medium;
+    font-weight: lighter;
+    font-style: italic;
+    text-align: start;
+}
+
+section extra-deets::after {
+    content: attr(location);
+    font-size: medium;
+    font-weight: lighter;
+    font-style: italic;
+    text-align: end;
+}
+
+/* section desc {
+    width: 95%;
+} */
+
+ul {
+    margin: 0;
+    list-style-type: none;
+}
+
+ul > li {
+    text-indent: -5px;
+}
+
+ul > li::before {
+    content: "- ";
+    text-indent: -10px;
+}
+
+
