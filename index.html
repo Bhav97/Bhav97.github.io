@@ -1,80 +1,58 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-US">
   <head>
-    <title>
-
-    </title>
-    <link rel="stylesheet" type="text/css" href="resume.css" />
+    <meta charset="utf-8">
+    <meta name="title" content="noobs">
+    <meta name="description" content="Just another website; but mine">
+    <meta name="author" content="0xnub">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>noobs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="canonical" href="https://nubs.me">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <meta property="og:title" content="noobs">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nubs.me">
+    <meta property="og:image" content="assets/logo.png">
   </head>
-  <body>
-  <header>
-    <h1>Anubhav Raina</h1>
-    <p>
-      <a href="mailto:anubhav7991@gmail.com">Mail</a> | 
-      <a href="https://www.linkedin.com/in/bhav97">LinkedIn</a> | 
-      <a href="https://www.github.com/bhav97">Github</a> |
-      <a href="https://nubs.me">nubs.me</a>
-    </p>
-  </header>
+  <body class="threed">
+    <style>
+      .threed:active {
+        text-shadow: -3px 0 1px cyan, 3px 0 1px red;
+      }
 
-  <section name="Skills">
-    <hr>
-    <deets role="" date="">
-    </deets>
-  </section>
+      .main {
+        background-color: #f5f5f5;
+        height: 100vh;
+        width: 100vw;
+      }
 
-  <section name="Experience">
-    <hr>
-    <deets role="Software Engineer" date="July 2021 - Present"></deets>
-    <extra-deets name="Aptiv Components - TCI" location="Bengaluru, IN"></extra-deets>
-      <desc>
-        Lorem Ipsum shit but it has to be long
-      </desc>
-
-    <deets role="Embedded Software Engineer" date="May 2019 - July 2021"></deets>
-    <extra-deets name="Vecmocon Technology Pvt. Ltd." location="Delhi, IN"></extra-deets>
-    <ul>
-      <li>Developed and maintained firmware for ISO 26262 compliant battery management systems</li>
-      <li>Responsible for the development of a portable A/B swap bootloader capable of receiving OTA updates via CAN allowing in-field reprogramming and updating of ECUs</li>
-      <li>Responsible for the bring up and development of hardware designed for internal testing and data logging</li>
-      <li>Developed cross-platform USB drivers for communicating with ECUs over a CAN-USB interface</li>
-      <li>Developed various communication bridges as per OEM requirements</li>
-    </ul>
-  </section>
-
-  <section name="Education">
-    <hr>
-    <deets role="Vellore Institute of Technology" date="May 2019"></deets>
-    <extra-deets name="Bachelor of Technology in Electrical and Electronics" location="Vellore, TN"></extra-deets>
-  </section>
-
-  <section name="Projects">
-    <hr>
-    <deets role="Raytracing in a weekend" date="Rust"></deets>
-    <extra-deets name="" location="Bengaluru, IN"></extra-deets>
-    <p>
-      A follow along of Peter Shirley's ray tracing in a weekend in Rust.
-    </p>
-  </section>
-  <!-- <education>
-    <hr>
-    <school>
-      <name>Vellore Institute Of Technology</name>
-      <year>May 2019</year>
-      <br>
-      <desc>Bachelor of Technology in Electrical and Electronics</desc>
-    </school>
-  </education>
-
-  <projects>
-    <h2>Projects</h2>
-    <hr>
-    <project>
-      <name>Autonomous </name>
-      <desc></desc>
-    </project>
-
-  </projects> -->
-
+      .footer {
+        background-color: #212121;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+    <main class="main d-flex flex-column justify-content-center">
+      <div class="progress">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" style="width: 50vw;"></div>
+      </div>
+      <div class="mx-auto text-center">
+        <p>I spent way too much time on this</p>
+      </div>
+    </main>
+    <footer class="pt-5 footer text-muted text-center text-small">
+      <div class="center-xs">
+        Copyright &copy; 2022 0xnub
+      </div>
+      <ul class="list-inline">
+        <li class="list-inline-item"><a class="badge badge-light" href="work.html">Work</a></li>
+        <li class="list-inline-item"><a class="badge badge-light" href="projects.html">Projects</a></li>
+        <li class="list-inline-item"><a class="badge badge-light" href="projects.html">Github</a></li>
+        <li class="list-inline-item"><a class="badge badge-light" href="projects.html">LinkedIn</a></li>
+      </ul>
+    </footer>
   </body>
 </html>
